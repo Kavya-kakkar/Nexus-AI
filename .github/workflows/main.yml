@@ -25,9 +25,11 @@ jobs:
         pip install pytest pytest-cov httpx pytest-asyncio
         
     - name: Run Pytest
+      env:
+        GROQ_API_KEY: "dummy_key_for_testing"
+        SECRET_KEY: "dummy_secret"
       run: |
         cd backend
-        # Using a dummy sqlite DB and disabling external APIs via env vars during tests
         pytest --cov=app --cov-report=xml
         
   build-frontend:
