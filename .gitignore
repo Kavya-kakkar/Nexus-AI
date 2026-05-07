@@ -1,0 +1,35 @@
+# Python & Virtual Environments
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+htmlcov/
+.coverage
+test.db
+
+# Node.js
+node_modules/
+dist/
+build/
+.npm
+
+# Environment Variables
+.env
+.env.*
+
+# Application Data & Storage
+backend/sql_app.db
+backend/uploads/*
+!backend/uploads/.keep
+backend/faiss_store/*
+!backend/faiss_store/.keep
+
+# IDEs and OS Files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

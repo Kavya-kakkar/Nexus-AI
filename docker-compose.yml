@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: nexus_ai_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./sql_app.db
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-supersecretkey}
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/faiss_store:/app/faiss_store
+      - ./backend/sql_app.db:/app/sql_app.db
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: nexus_ai_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+    restart: unless-stopped
