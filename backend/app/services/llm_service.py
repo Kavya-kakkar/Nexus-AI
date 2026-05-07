@@ -15,11 +15,13 @@ import shutil
 
 ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
 ffmpeg_dir = os.path.dirname(ffmpeg_exe)
-ffmpeg_alias = os.path.join(ffmpeg_dir, "ffmpeg.exe")
+ffmpeg_alias = os.path.join(ffmpeg_dir, "ffmpeg.exe" if os.name == "nt" else "ffmpeg")
 
 if not os.path.exists(ffmpeg_alias):
     try:
         shutil.copyfile(ffmpeg_exe, ffmpeg_alias)
+        if os.name != "nt":
+            os.chmod(ffmpeg_alias, 0o755)
     except:
         pass
 

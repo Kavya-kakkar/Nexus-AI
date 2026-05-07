@@ -10,6 +10,7 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 engine_test = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_test)
 
+Base.metadata.drop_all(bind=engine_test)
 Base.metadata.create_all(bind=engine_test)
 
 def override_get_db():
