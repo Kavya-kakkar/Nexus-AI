@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.schema import Document as LangchainDocument
+from langchain_core.documents import Document as LangchainDocument
 from app.core.config import settings
 import pdfplumber
 
