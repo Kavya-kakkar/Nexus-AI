@@ -21,7 +21,17 @@ def chat_with_docs(
         history_formatted.append({"role": "user", "content": h.question})
         history_formatted.append({"role": "assistant", "content": h.answer})
         
-    answer, sources = ask_question(request.question, current_user.id, history_formatted)
+    # Fetch user documents and build summaries context
+    from app.models import Document
+    user_docs = db.query(Document).filter(Document.owner_id == current_user.id).all()
+    user_doc_ids = [doc.id for doc in user_docs]
+    
+    db_summaries = "Document Summaries:\n"
+    for doc in user_docs:
+        if doc.summary:
+            db_summaries += f"Source: doc_{doc.id} | Filename: {doc.filename} | Summary: {doc.summary}\n"
+            
+    answer, sources = ask_question(request.question, user_doc_ids, db_summaries, history_formatted)
     
     # Save chat
     new_chat = Chat(

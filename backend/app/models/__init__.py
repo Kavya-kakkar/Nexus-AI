@@ -9,6 +9,12 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     
+    # Profile fields
+    email = Column(String, unique=True, index=True, nullable=True)
+    full_name = Column(String, nullable=True)
+    bio = Column(Text, nullable=True)
+    avatar_url = Column(String, nullable=True)
+    
     documents = relationship("Document", back_populates="owner")
     chats = relationship("Chat", back_populates="user")
 

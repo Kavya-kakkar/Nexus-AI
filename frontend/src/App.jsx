@@ -5,6 +5,7 @@ import Upload from './components/Upload';
 import Chat from './components/Chat';
 import MediaPlayer from './components/MediaPlayer';
 import DocumentList from './components/DocumentList';
+import Profile from './components/Profile';
 import { LogOut, BrainCircuit, User as UserIcon, Lock, ArrowRight, Menu, X } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
@@ -19,6 +20,7 @@ function App() {
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoginState, setIsLoginState] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('chat');
 
   useEffect(() => {
     if (token) {
@@ -233,9 +235,28 @@ function App() {
         
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
           <Upload token={token} onUploadSuccess={fetchDocuments} />
+          
+          <div className="mt-8">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 pl-2">Navigation</h3>
+            <button 
+              onClick={() => setCurrentView('chat')}
+              className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all ${currentView === 'chat' ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'}`}
+            >
+              <BrainCircuit className="w-5 h-5" />
+              <span className="font-medium">AI Chat & Media</span>
+            </button>
+            <button 
+              onClick={() => setCurrentView('profile')}
+              className={`flex items-center gap-3 w-full px-4 py-3 mt-2 rounded-xl transition-all ${currentView === 'profile' ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'}`}
+            >
+              <UserIcon className="w-5 h-5" />
+              <span className="font-medium">My Profile</span>
+            </button>
+          </div>
+
           <div className="mt-8">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 pl-2">Your Knowledge Base</h3>
-            <DocumentList documents={documents} onSelectMedia={setSelectedMedia} selectedMediaId={selectedMedia?.id} onDelete={deleteDocument} />
+            <DocumentList documents={documents} onSelectMedia={(media) => { setSelectedMedia(media); setCurrentView('chat'); }} selectedMediaId={selectedMedia?.id} onDelete={deleteDocument} />
           </div>
         </div>
 
@@ -264,24 +285,32 @@ function App() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-[#0a0a0a] to-[#0a0a0a] pointer-events-none" />
         
         <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
-          {selectedMedia && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "40%", opacity: 1 }}
-              className="border-b border-white/10 bg-black/50 backdrop-blur-md relative z-10 shrink-0"
-            >
-              <MediaPlayer src={`${API_URL}/media/${selectedMedia.id}`} seekTime={seekTime} type={selectedMedia.file_type} title={selectedMedia.filename} />
-            </motion.div>
+          {currentView === 'profile' ? (
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <Profile token={token} />
+            </div>
+          ) : (
+            <>
+              {selectedMedia && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "40%", opacity: 1 }}
+                  className="border-b border-white/10 bg-black/50 backdrop-blur-md relative z-10 shrink-0"
+                >
+                  <MediaPlayer src={`${API_URL}/media/${selectedMedia.id}`} seekTime={seekTime} type={selectedMedia.file_type} title={selectedMedia.filename} />
+                </motion.div>
+              )}
+              
+              <div className="flex-1 relative bg-transparent min-h-0">
+                <Chat token={token} onTimestampClick={(time, docId) => {
+                  setSeekTime(time);
+                  const doc = documents.find(d => d.id === docId);
+                  if (doc) setSelectedMedia(doc);
+                  setIsSidebarOpen(false); // Auto close sidebar on mobile when navigating from chat source
+                }} />
+              </div>
+            </>
           )}
-          
-          <div className="flex-1 relative bg-transparent min-h-0">
-            <Chat token={token} onTimestampClick={(time, docId) => {
-              setSeekTime(time);
-              const doc = documents.find(d => d.id === docId);
-              if (doc) setSelectedMedia(doc);
-              setIsSidebarOpen(false); // Auto close sidebar on mobile when navigating from chat source
-            }} />
-          </div>
         </div>
       </div>
     </div>

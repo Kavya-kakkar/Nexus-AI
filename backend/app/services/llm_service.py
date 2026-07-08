@@ -22,7 +22,7 @@ if not os.path.exists(ffmpeg_alias):
         shutil.copyfile(ffmpeg_exe, ffmpeg_alias)
         if os.name != "nt":
             os.chmod(ffmpeg_alias, 0o755)
-    except:
+    except Exception:
         pass
 
 os.environ["PATH"] += os.pathsep + ffmpeg_dir
@@ -37,7 +37,7 @@ embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 # Initialize whisper lazily so it doesn't block startup too long, or initialize here
 try:
     whisper_model = whisper.load_model("base")
-except:
+except Exception:
     whisper_model = None
 
 VECTOR_STORE_PATH = "faiss_store"
@@ -108,7 +108,8 @@ def process_audio_video(filepath: str, document_id: int):
     return text
 
 def _add_to_faiss(docs: List[LangchainDocument]):
-    if not docs: return
+    if not docs:
+        return
     vector_store = get_vector_store()
     if vector_store:
         vector_store.add_documents(docs)
@@ -123,21 +124,25 @@ def generate_summary(text: str) -> str:
     response = llm.invoke(prompt)
     return response.content
 
-def ask_question(question: str, user_id: int, chat_history: List[Dict[str, str]] = None) -> tuple[str, List[dict]]:
+def ask_question(question: str, user_doc_ids: List[int], db_summaries: str, chat_history: List[Dict[str, str]] = None) -> tuple[str, List[dict]]:
     vector_store = get_vector_store()
     if not vector_store:
         return "No documents uploaded yet.", []
         
-    docs = vector_store.similarity_search(question, k=5)
+    docs = vector_store.similarity_search(question, k=20)
     
-    context = ""
+    valid_sources = [f"doc_{doc_id}" for doc_id in user_doc_ids]
+    filtered_docs = [d for d in docs if d.metadata.get('source') in valid_sources][:5]
+    
+    context = db_summaries + "\n\nRetrieved Chunks:\n"
     sources = []
-    for d in docs:
+    for d in filtered_docs:
         context += f"Source: {d.metadata.get('source')} | Timestamp: {d.metadata.get('timestamp', 'N/A')} | Content: {d.page_content}\n"
         sources.append(d.metadata)
         
     prompt = f"""
     You are an AI assistant. Answer the user's question ONLY based on the provided context. 
+    The context includes overarching document summaries and specific relevant chunks.
     If the context doesn't contain the answer, say "I don't know based on the uploaded documents."
     If you use information from a media file with a timestamp, INCLUDE the timestamp in your answer like [01:23].
     
