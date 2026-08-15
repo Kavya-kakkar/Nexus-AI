@@ -49,8 +49,9 @@ export default function DocumentList({ documents, onSelectMedia, selectedMediaId
                 </div>
               </div>
               
-              {doc.file_type === 'media' && (
+              {(doc.file_type === 'media' || doc.file_type === 'audio' || doc.file_type === 'video') && (
                 <button 
+
                   className={`shrink-0 p-2 rounded-xl transition-colors ${
                     isSelected 
                       ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30' 

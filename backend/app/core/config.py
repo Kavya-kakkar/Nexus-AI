@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import dotenv_values
 
 env_path = Path(__file__).resolve().parent.parent.parent / ".env"
@@ -23,9 +23,9 @@ class Settings(BaseSettings):
     
     UPLOAD_DIR: str = "uploads"
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()
 
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+

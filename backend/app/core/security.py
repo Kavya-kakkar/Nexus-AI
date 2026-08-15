@@ -1,11 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import jwt
 import bcrypt
 from app.core.config import settings
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
-        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+        truncated_pwd = plain_password[:72]
+        return bcrypt.checkpw(truncated_pwd.encode('utf-8'), hashed_password.encode('utf-8'))
     except Exception:
         return False
 
@@ -19,10 +20,12 @@ def get_password_hash(password: str) -> str:
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
+    now = datetime.now(timezone.utc)
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = now + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = now + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
+

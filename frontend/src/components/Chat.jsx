@@ -76,10 +76,11 @@ export default function Chat({ token, onTimestampClick }) {
         
         let docId = null;
         if (sources && sources.length > 0) {
-            const mediaSource = sources.find(s => s.type === "media");
-            if (mediaSource) {
+            const mediaSource = sources.find(s => s.type === "media" || s.type === "audio" || s.type === "video");
+            if (mediaSource && mediaSource.source) {
                 docId = parseInt(mediaSource.source.split('_')[1]);
             }
+
         }
 
         return (

@@ -11,7 +11,12 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 engine_test = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine_test)
 
-Base.metadata.create_all(bind=engine_test)
+@pytest.fixture(autouse=True)
+def setup_test_db():
+    Base.metadata.drop_all(bind=engine_test)
+    Base.metadata.create_all(bind=engine_test)
+    yield
+    Base.metadata.drop_all(bind=engine_test)
 
 def override_get_db():
     try:
@@ -23,6 +28,7 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
+
 
 @pytest.fixture
 def auth_token():

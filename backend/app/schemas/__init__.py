@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
@@ -14,8 +14,7 @@ class UserResponse(BaseModel):
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UserUpdate(BaseModel):
     email: Optional[str] = None
@@ -33,8 +32,8 @@ class DocumentResponse(BaseModel):
     file_type: str
     summary: Optional[str] = None
     created_at: datetime
-    class Config:
-        from_attributes = True
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class ChatRequest(BaseModel):
     question: str
@@ -42,3 +41,4 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     answer: str
     sources: List[dict] = []
+

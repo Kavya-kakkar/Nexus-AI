@@ -17,10 +17,10 @@ def process_file_background(filepath: str, document_id: int, file_type: str):
         if file_type == "pdf":
             text = llm_service.process_pdf(filepath, document_id)
         else:
-            # For mp3, wav, mp4, mkv
+            # For audio (mp3, wav) or video (mp4, mkv)
             text = llm_service.process_audio_video(filepath, document_id)
             
-        summary = llm_service.generate_summary(text)
+        summary = llm_service.generate_summary(text) if text and text.strip() else "No text extracted from file."
         
         doc = db.query(Document).filter(Document.id == document_id).first()
         if doc:
@@ -28,6 +28,13 @@ def process_file_background(filepath: str, document_id: int, file_type: str):
             db.commit()
     except Exception as e:
         print(f"Error processing file: {e}")
+        try:
+            doc = db.query(Document).filter(Document.id == document_id).first()
+            if doc:
+                doc.summary = "Summary generation failed or file content could not be processed."
+                db.commit()
+        except Exception:
+            pass
     finally:
         db.close()
 
@@ -38,7 +45,9 @@ def upload_document(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    ext = file.filename.split(".")[-1].lower()
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    ext = os.path.splitext(file.filename)[1].lstrip(".").lower()
     if ext not in ["pdf", "mp3", "wav", "mp4", "mkv"]:
         raise HTTPException(status_code=400, detail="Unsupported file format")
         
@@ -46,7 +55,12 @@ def upload_document(
     with open(filepath, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
         
-    file_type = "pdf" if ext == "pdf" else "media"
+    if ext == "pdf":
+        file_type = "pdf"
+    elif ext in ["mp3", "wav"]:
+        file_type = "audio"
+    else:
+        file_type = "video"
     
     new_doc = Document(
         filename=file.filename,
@@ -61,6 +75,7 @@ def upload_document(
     background_tasks.add_task(process_file_background, filepath, new_doc.id, file_type)
     
     return new_doc
+
 
 @router.get("/", response_model=list[DocumentResponse])
 def list_documents(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

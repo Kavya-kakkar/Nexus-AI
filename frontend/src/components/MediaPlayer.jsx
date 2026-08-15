@@ -11,9 +11,11 @@ export default function MediaPlayer({ src, seekTime, type, title }) {
     }
   }, [seekTime]);
 
-  const isAudio = type === 'mp3' || type === 'wav' || type === 'audio';
+  const isAudio = type === 'audio' || type === 'mp3' || type === 'wav' || 
+    (title && (title.toLowerCase().endsWith('.mp3') || title.toLowerCase().endsWith('.wav')));
 
   return (
+
     <div className="w-full h-full flex flex-col relative overflow-hidden bg-black/80">
       <div className="absolute top-0 left-0 w-full p-4 bg-gradient-to-b from-black/80 to-transparent z-10 flex items-center justify-between pointer-events-none">
         <h3 className="text-white/80 text-sm font-medium drop-shadow-md truncate max-w-md">{title || "Media Player"}</h3>
