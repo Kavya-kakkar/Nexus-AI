@@ -1,4 +1,8 @@
+import os
+import shutil
+from typing import List
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from app.db.session import get_db, SessionLocal
 from app.api.deps import get_current_user
@@ -6,8 +10,6 @@ from app.models import User, Document
 from app.schemas import DocumentResponse
 from app.services import llm_service
 from app.core.config import settings
-import os
-import shutil
 
 router = APIRouter()
 
@@ -47,11 +49,13 @@ def upload_document(
 ):
     if not file.filename:
         raise HTTPException(status_code=400, detail="Invalid filename")
-    ext = os.path.splitext(file.filename)[1].lstrip(".").lower()
+    
+    clean_filename = os.path.basename(file.filename)
+    ext = os.path.splitext(clean_filename)[1].lstrip(".").lower()
     if ext not in ["pdf", "mp3", "wav", "mp4", "mkv"]:
         raise HTTPException(status_code=400, detail="Unsupported file format")
         
-    filepath = os.path.join(settings.UPLOAD_DIR, f"{current_user.id}_{file.filename}")
+    filepath = os.path.join(settings.UPLOAD_DIR, f"{current_user.id}_{clean_filename}")
     with open(filepath, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
         
@@ -63,7 +67,7 @@ def upload_document(
         file_type = "video"
     
     new_doc = Document(
-        filename=file.filename,
+        filename=clean_filename,
         file_type=file_type,
         filepath=filepath,
         owner_id=current_user.id
@@ -77,11 +81,10 @@ def upload_document(
     return new_doc
 
 
-@router.get("/", response_model=list[DocumentResponse])
+@router.get("/", response_model=List[DocumentResponse])
 def list_documents(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return db.query(Document).filter(Document.owner_id == current_user.id).all()
 
-from fastapi.responses import FileResponse
 
 @router.get("/media/{document_id}")
 def get_media(document_id: int, db: Session = Depends(get_db)):
@@ -105,7 +108,7 @@ def delete_document(
     if os.path.exists(doc.filepath):
         try:
             os.remove(doc.filepath)
-        except:
+        except OSError:
             pass
             
     db.delete(doc)

@@ -67,12 +67,17 @@ export default function Chat({ token, onTimestampClick }) {
   };
 
   const renderContent = (content, sources) => {
-    const parts = content.split(/(\[\d{2}:\d{2}\])/g);
+    const parts = content.split(/(\[\d{1,2}:\d{2}(?::\d{2})?\])/g);
     return parts.map((part, i) => {
-      if (part.match(/\[\d{2}:\d{2}\]/)) {
+      if (part.match(/^\[\d{1,2}:\d{2}(?::\d{2})?\]$/)) {
         const timeStr = part.replace(/[\[\]]/g, '');
-        const [mins, secs] = timeStr.split(':').map(Number);
-        const timeInSeconds = mins * 60 + secs;
+        const segments = timeStr.split(':').map(Number);
+        let timeInSeconds = 0;
+        if (segments.length === 3) {
+          timeInSeconds = segments[0] * 3600 + segments[1] * 60 + segments[2];
+        } else if (segments.length === 2) {
+          timeInSeconds = segments[0] * 60 + segments[1];
+        }
         
         let docId = null;
         if (sources && sources.length > 0) {
@@ -80,7 +85,6 @@ export default function Chat({ token, onTimestampClick }) {
             if (mediaSource && mediaSource.source) {
                 docId = parseInt(mediaSource.source.split('_')[1]);
             }
-
         }
 
         return (
@@ -88,7 +92,7 @@ export default function Chat({ token, onTimestampClick }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             key={i}
-            className="inline-flex items-center gap-1 text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-md text-sm font-medium mx-1 hover:bg-purple-500/20 transition-colors"
+            className="inline-flex items-center gap-1 text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-md text-sm font-medium mx-1 hover:bg-purple-500/20 transition-colors cursor-pointer"
             onClick={() => onTimestampClick(timeInSeconds, docId)}
           >
             <Clock className="w-3 h-3" />

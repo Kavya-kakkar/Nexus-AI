@@ -1,8 +1,9 @@
+from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.api.deps import get_current_user
-from app.models import User, Chat
+from app.models import User, Chat, Document
 from app.schemas import ChatRequest, ChatResponse
 from app.services.llm_service import ask_question
 
@@ -22,9 +23,8 @@ def chat_with_docs(
         history_formatted.append({"role": "assistant", "content": h.answer})
         
     # Fetch user documents and build summaries context
-    from app.models import Document
     user_docs = db.query(Document).filter(Document.owner_id == current_user.id).all()
-    user_doc_ids = [doc.id for doc in user_docs]
+    user_doc_ids: List[int] = [doc.id for doc in user_docs]
     
     db_summaries = "Document Summaries:\n"
     for doc in user_docs:

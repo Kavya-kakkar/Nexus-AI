@@ -1,9 +1,7 @@
 import os
-import json
-import uuid
 import shutil
 import warnings
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Tuple
 
 import pdfplumber
 import imageio_ffmpeg
@@ -59,7 +57,7 @@ def get_whisper_model():
             _whisper_model = None
     return _whisper_model
 
-VECTOR_STORE_PATH = "faiss_store"
+VECTOR_STORE_PATH = settings.FAISS_DIR
 
 def get_vector_store():
     index_file = os.path.join(VECTOR_STORE_PATH, "index.faiss")
@@ -148,10 +146,19 @@ def generate_summary(text: str) -> str:
     # Truncate text to avoid token limits
     truncated = text[:15000]
     prompt = f"Summarize the following content concisely:\n\n{truncated}"
-    response = get_llm().invoke(prompt)
-    return response.content
+    try:
+        response = get_llm().invoke(prompt)
+        return str(response.content)
+    except Exception as e:
+        print(f"Error generating summary: {e}")
+        return "Summary could not be generated at this time."
 
-def ask_question(question: str, user_doc_ids: List[int], db_summaries: str, chat_history: List[Dict[str, str]] = None) -> tuple[str, List[dict]]:
+def ask_question(
+    question: str, 
+    user_doc_ids: List[int], 
+    db_summaries: str, 
+    chat_history: Optional[List[Dict[str, str]]] = None
+) -> Tuple[str, List[Dict[str, Any]]]:
     if not user_doc_ids:
         return "No documents uploaded yet.", []
 
@@ -165,7 +172,7 @@ def ask_question(question: str, user_doc_ids: List[int], db_summaries: str, chat
     filtered_docs = [d for d in docs if d.metadata.get('source') in valid_sources][:5]
     
     context = db_summaries + "\n\nRetrieved Chunks:\n"
-    sources = []
+    sources: List[Dict[str, Any]] = []
     for d in filtered_docs:
         ts = d.metadata.get('timestamp')
         if ts is not None and isinstance(ts, (int, float)):
@@ -189,7 +196,7 @@ def ask_question(question: str, user_doc_ids: List[int], db_summaries: str, chat
     Question: {question}
     """
     
-    messages = [SystemMessage(content="You are a helpful RAG assistant.")]
+    messages: List[Any] = [SystemMessage(content="You are a helpful RAG assistant.")]
     if chat_history:
         for msg in chat_history[-4:]: # Keep last 4 messages for context
             if msg["role"] == "user":
@@ -199,6 +206,9 @@ def ask_question(question: str, user_doc_ids: List[int], db_summaries: str, chat
                 
     messages.append(HumanMessage(content=prompt))
     
-    response = get_llm().invoke(messages)
-    
-    return response.content, sources
+    try:
+        response = get_llm().invoke(messages)
+        return str(response.content), sources
+    except Exception as e:
+        print(f"Error querying LLM: {e}")
+        return "An error occurred while generating the answer. Please check your Groq API key and network connection.", sources
