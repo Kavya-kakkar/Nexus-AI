@@ -9,8 +9,16 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 export default function Upload({ token, onUploadSuccess }) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [uploadError, setUploadError] = useState(null);
 
-  const onDrop = useCallback(async (acceptedFiles) => {
+  const onDrop = useCallback(async (acceptedFiles, rejectedFiles) => {
+    setUploadError(null);
+
+    if (rejectedFiles && rejectedFiles.length > 0) {
+      setUploadError(`Unsupported file type. Please upload PDF, MP3, WAV, MP4, or MKV files.`);
+      return;
+    }
+
     setUploading(true);
     setProgress(0);
     
@@ -30,13 +38,24 @@ export default function Upload({ token, onUploadSuccess }) {
         });
       } catch (err) {
         console.error("Upload error", err);
+        const detail = err?.response?.data?.detail || 'Upload failed. Please try again.';
+        setUploadError(detail);
       }
     }
     setUploading(false);
     onUploadSuccess();
   }, [token, onUploadSuccess]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'audio/mpeg': ['.mp3'],
+      'audio/wav': ['.wav'],
+      'video/mp4': ['.mp4'],
+      'video/x-matroska': ['.mkv'],
+    }
+  });
 
   return (
     <motion.div 
@@ -49,6 +68,12 @@ export default function Upload({ token, onUploadSuccess }) {
           : 'bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/30'}`}
     >
       <input {...getInputProps()} />
+
+      {uploadError && (
+        <div className="absolute top-2 left-2 right-2 bg-red-500/20 border border-red-500/40 text-red-300 text-xs rounded-lg px-3 py-2">
+          ⚠️ {uploadError}
+        </div>
+      )}
       
       {uploading ? (
         <div className="flex flex-col items-center gap-3">
