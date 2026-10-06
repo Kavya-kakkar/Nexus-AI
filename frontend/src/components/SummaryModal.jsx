@@ -1,0 +1,117 @@
+import React from 'react';
+
+export default function SummaryModal({
+  isOpen,
+  onClose,
+  document,
+  onJumpToSource,
+}) {
+  if (!isOpen || !document) return null;
+
+  // Split summary into key highlight bullets
+  const highlights = React.useMemo(() => {
+    if (!document.summary) return [];
+    return document.summary
+      .split(/(?<=[.?!])\s+/)
+      .filter((s) => s.trim().length > 15)
+      .slice(0, 4);
+  }, [document.summary]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/50 backdrop-blur-xs">
+      <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant w-full max-w-4xl max-h-[88vh] flex flex-col shadow-[0px_8px_32px_rgba(0,0,0,0.1)] overflow-hidden">
+        {/* Header */}
+        <header className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface flex-none">
+          <div className="flex flex-col">
+            <h2 className="text-lg font-bold text-on-surface truncate max-w-lg">
+              {document.filename}
+            </h2>
+            <span className="text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5">
+              <span className="material-symbols-outlined text-[14px]">schedule</span>
+              <span>AI Synthesized Summary • Verified</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                if (onJumpToSource) onJumpToSource(document);
+                onClose();
+              }}
+              className="px-3.5 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-surface-tint transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">chat</span>
+              <span>Open in Workspace</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Content Body */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-surface-bright custom-scrollbar">
+          {/* Key Highlights Section */}
+          <section className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant shadow-xs">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-2 text-primary">
+                <span className="material-symbols-outlined text-[20px]">
+                  auto_awesome
+                </span>
+                <h3 className="text-sm font-bold text-on-surface">
+                  Key Revenue &amp; Strategic Highlights
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  if (onJumpToSource) onJumpToSource(document);
+                  onClose();
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary-container/15 text-secondary rounded-md text-[11px] font-semibold hover:bg-secondary-container/25 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[14px]">
+                  open_in_new
+                </span>
+                <span>Jump to source</span>
+              </button>
+            </div>
+
+            {highlights.length > 0 ? (
+              <ul className="space-y-2.5 text-xs text-on-surface-variant leading-relaxed">
+                {highlights.map((bullet, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-secondary-container shrink-0 mt-1.5"></span>
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-on-surface-variant">
+                Summary extraction in progress...
+              </p>
+            )}
+          </section>
+
+          {/* Full Executive Synthesis */}
+          <section className="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant shadow-xs">
+            <h3 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[18px]">
+                description
+              </span>
+              <span>Full Document Synthesis</span>
+            </h3>
+
+            <div className="text-xs text-on-surface-variant leading-relaxed whitespace-pre-wrap">
+              {document.summary ||
+                'No text extracted from file or summary is being generated by background workers.'}
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  );
+}
