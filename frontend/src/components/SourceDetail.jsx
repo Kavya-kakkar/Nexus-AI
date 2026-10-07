@@ -120,7 +120,7 @@ export default function SourceDetail({ document, onBack, onOpenWorkspace }) {
         {/* Left Side: Media / Document Canvas */}
         <div className="flex-1 flex flex-col bg-surface p-4 md:p-6 gap-6 overflow-y-auto border-r border-outline-variant custom-scrollbar">
           {/* Media Player Card */}
-          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.05)] flex-none min-h-[340px]">
+          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest overflow-hidden shadow-[0px_4px_20px_rgba(0,0,0,0.05)] flex-none min-h-80">
             {isMedia ? (
               <MediaPlayer
                 src={mediaUrl}
@@ -180,7 +180,7 @@ export default function SourceDetail({ document, onBack, onOpenWorkspace }) {
         </div>
 
         {/* Right Side: Synced Transcript Rail */}
-        <div className="w-[380px] md:w-[420px] flex-none bg-surface-container-lowest flex flex-col h-full shadow-[-4px_0px_20px_rgba(0,0,0,0.02)] z-10">
+        <div className="w-95 md:w-105 flex-none bg-surface-container-lowest flex flex-col h-full shadow-[-4px_0px_20px_rgba(0,0,0,0.02)] z-10">
           {/* Transcript Header */}
           <div className="p-4 border-b border-outline-variant flex items-center justify-between bg-surface-container-lowest sticky top-0 z-10">
             <div className="flex items-center gap-2">

@@ -140,7 +140,7 @@ export default function MediaPlayer({
       </div>
 
       {/* Media Canvas Area */}
-      <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden min-h-[220px]">
+      <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden min-h-70">
         {error ? (
           <div className="text-center p-6 text-white/70">
             <span className="material-symbols-outlined text-error text-[36px] mb-2">
@@ -150,7 +150,7 @@ export default function MediaPlayer({
             <p className="text-[11px] text-white/50 mt-1">{error}</p>
           </div>
         ) : isAudio ? (
-          <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#141b2b] to-[#0a0e17] text-white relative">
+          <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-linear-to-b from-[#141b2b] to-[#0a0e17] text-white relative">
             <audio
               ref={mediaRef}
               src={src}

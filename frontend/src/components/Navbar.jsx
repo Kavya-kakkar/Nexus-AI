@@ -72,7 +72,7 @@ export default function Navbar({
           </div>
           {activeDocument?.summary && (
             <>
-              <div className="w-[1px] h-3.5 bg-outline-variant mx-1"></div>
+              <div className="w-1 h-3.5 bg-outline-variant mx-1"></div>
               <button
                 onClick={onOpenSummary}
                 className="px-3 py-1 flex items-center gap-1.5 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant group cursor-pointer text-xs font-medium"

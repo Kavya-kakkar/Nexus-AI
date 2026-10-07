@@ -77,7 +77,7 @@ export default function SettingsView({ currentUser, onUpdateUser, onBack, onLogo
       {/* Main Settings Layout */}
       <main className="flex-1 flex flex-col md:flex-row w-full max-w-6xl mx-auto px-4 md:px-8 py-8 gap-8">
         {/* Left Settings Navigation */}
-        <aside className="w-full md:w-60 flex-shrink-0">
+        <aside className="w-full md:w-60 flex-shrin k-0">
           <nav className="flex flex-row md:flex-col gap-1.5">
             <button
               onClick={() => setActiveTab('profile')}

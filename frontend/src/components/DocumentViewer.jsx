@@ -13,7 +13,7 @@ export default function DocumentViewer({
 
   if (!activeDocument) {
     return (
-      <aside className="hidden lg:flex w-[420px] xl:w-[460px] h-full flex-col bg-surface shrink-0 z-10 shadow-[-4px_0_24px_rgba(0,0,0,0.02)] items-center justify-center p-8 text-center border-l border-outline-variant/60">
+      <aside className="hidden lg:flex w-105 xl:w-115 h-full flex-col bg-surface shrink-0 z-10 shadow-[-4px_0_24px_rgba(0,0,0,0.02)] items-center justify-center p-8 text-center border-l border-outline-variant/60">
         <div className="w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center text-primary mb-3">
           <span className="material-symbols-outlined text-[32px]">
             visibility
@@ -40,7 +40,7 @@ export default function DocumentViewer({
   };
 
   return (
-    <aside className="hidden lg:flex w-[420px] xl:w-[480px] h-full flex-col bg-surface shrink-0 z-10 shadow-[-4px_0_24px_rgba(0,0,0,0.02)] border-l border-outline-variant/60">
+    <aside className="hidden lg:flex w-105 xl:w-115 h-full flex-col bg-surface shrink-0 z-10 shadow-[-4px_0_24px_rgba(0,0,0,0.02)] border-l border-outline-variant/60">
       {/* Viewer Header */}
       <div className="flex justify-between items-center px-4 py-3 border-b border-outline-variant bg-surface-container-lowest">
         <div className="flex items-center gap-2 min-w-0">
@@ -52,7 +52,7 @@ export default function DocumentViewer({
               : 'picture_as_pdf'}
           </span>
           <h3
-            className="text-xs font-semibold text-on-surface truncate max-w-[200px]"
+            className="text-xs font-semibold text-on-surface truncate max-w-24"
             title={activeDocument.filename}
           >
             {activeDocument.filename}
@@ -80,7 +80,7 @@ export default function DocumentViewer({
                   zoom_out
                 </span>
               </button>
-              <div className="w-[1px] h-4 bg-outline-variant mx-1"></div>
+              <div className="w-1 h-4 bg-outline-variant mx-1"></div>
             </>
           )}
 
@@ -114,7 +114,7 @@ export default function DocumentViewer({
       <div className="flex-1 overflow-y-auto bg-surface-container-low p-4 flex flex-col items-center custom-scrollbar">
         {isMedia ? (
           <div className="w-full h-full flex flex-col">
-            <div className="h-[280px] w-full">
+            <div className="h-70 w-full">
               <MediaPlayer
                 src={mediaUrl}
                 seekTime={seekTime}

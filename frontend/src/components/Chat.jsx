@@ -416,7 +416,7 @@ export default function Chat({
       </div>
 
       {/* Sticky Bottom Prompt Input Bar */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-surface-bright via-surface-bright/95 to-transparent pt-8 z-20">
+      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-linear-to-t from-surface-bright via-surface-bright/95 to-transparent pt-8 z-20">
         <form
           onSubmit={handleSend}
           className="bg-surface-container-lowest border border-outline-variant rounded-xl ambient-shadow p-2 focus-within:ring-2 focus-within:ring-primary/25 focus-within:border-primary transition-all flex flex-col"
