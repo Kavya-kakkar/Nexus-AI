@@ -13,6 +13,12 @@ export default function Navbar({
 }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
+  const [navAvatarError, setNavAvatarError] = useState(false);
+
+  useEffect(() => {
+    setNavAvatarError(false);
+  }, [currentUser?.avatar_url]);
+
   return (
     <header className="h-16 flex-none bg-surface border-b border-outline-variant px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-[0px_2px_8px_rgba(0,0,0,0.02)]">
       {/* Brand & Left Actions */}
@@ -72,7 +78,7 @@ export default function Navbar({
           </div>
           {activeDocument?.summary && (
             <>
-              <div className="w-1 h-3.5 bg-outline-variant mx-1"></div>
+              <div className="w-[1p x] h-3.5 bg-outline-variant mx-1"></div>
               <button
                 onClick={onOpenSummary}
                 className="px-3 py-1 flex items-center gap-1.5 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant group cursor-pointer text-xs font-medium"
@@ -136,11 +142,12 @@ export default function Navbar({
             className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant flex items-center justify-center bg-surface-variant cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all"
             title={currentUser?.username || 'User Profile'}
           >
-            {currentUser?.avatar_url ? (
+            {currentUser?.avatar_url && !navAvatarError ? (
               <img
                 src={currentUser.avatar_url}
                 alt={currentUser.username}
                 className="w-full h-full object-cover"
+                onError={() => setNavAvatarError(true)}
               />
             ) : (
               <span className="text-xs font-bold text-primary">

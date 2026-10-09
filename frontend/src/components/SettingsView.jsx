@@ -55,6 +55,20 @@ export default function SettingsView({ currentUser, onUpdateUser, onBack, onLogo
     }
   };
 
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [formData.avatar_url]);
+
+  const PRESET_AVATARS = [
+    { label: 'Executive', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80' },
+    { label: 'Analyst', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80' },
+    { label: 'Tech Lead', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=256&q=80' },
+    { label: 'AI Bot', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Nexus' },
+    { label: 'Minimalist', url: 'https://api.dicebear.com/7.x/identicon/svg?seed=NexusAI' },
+  ];
+
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-surface">
       {/* Settings Top Header */}
@@ -77,7 +91,7 @@ export default function SettingsView({ currentUser, onUpdateUser, onBack, onLogo
       {/* Main Settings Layout */}
       <main className="flex-1 flex flex-col md:flex-row w-full max-w-6xl mx-auto px-4 md:px-8 py-8 gap-8">
         {/* Left Settings Navigation */}
-        <aside className="w-full md:w-60 flex-shrin k-0">
+        <aside className="w-full md:w-60 flex-shrink-0">
           <nav className="flex flex-row md:flex-col gap-1.5">
             <button
               onClick={() => setActiveTab('profile')}
@@ -147,12 +161,13 @@ export default function SettingsView({ currentUser, onUpdateUser, onBack, onLogo
               <form onSubmit={handleSaveProfile} className="space-y-5">
                 {/* Avatar Preview */}
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-surface-variant border border-outline-variant flex items-center justify-center overflow-hidden">
-                    {formData.avatar_url ? (
+                  <div className="w-16 h-16 rounded-2xl bg-surface-variant border border-outline-variant flex items-center justify-center overflow-hidden shrink-0">
+                    {formData.avatar_url && !imgError ? (
                       <img
                         src={formData.avatar_url}
                         alt="Avatar"
                         className="w-full h-full object-cover"
+                        onError={() => setImgError(true)}
                       />
                     ) : (
                       <span className="text-xl font-bold text-primary">
@@ -164,9 +179,35 @@ export default function SettingsView({ currentUser, onUpdateUser, onBack, onLogo
                     <h3 className="text-xs font-bold text-on-surface">
                       Profile Avatar
                     </h3>
-                    <p className="text-[11px] text-on-surface-variant mb-2">
-                      Enter an image URL below to set your avatar photo.
+                    <p className="text-[11px] text-on-surface-variant mb-1.5">
+                      {imgError ? (
+                        <span className="text-error font-medium">
+                          ⚠️ Unable to load this image URL. Falling back to initials. Choose a preset or direct image link.
+                        </span>
+                      ) : (
+                        'Enter a direct image URL or choose a preset below.'
+                      )}
                     </p>
+                    {/* Quick Presets */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {PRESET_AVATARS.map((preset, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, avatar_url: preset.url }));
+                            setImgError(false);
+                          }}
+                          className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors cursor-pointer border ${
+                            formData.avatar_url === preset.url
+                              ? 'bg-primary text-on-primary border-primary'
+                              : 'bg-surface-container text-on-surface hover:bg-surface-container-high border-outline-variant/60'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -220,9 +261,23 @@ export default function SettingsView({ currentUser, onUpdateUser, onBack, onLogo
 
                   {/* Avatar URL */}
                   <div>
-                    <label className="block text-xs font-semibold text-on-surface mb-1">
-                      Avatar URL
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-xs font-semibold text-on-surface">
+                        Avatar Image URL
+                      </label>
+                      {formData.avatar_url && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, avatar_url: '' }));
+                            setImgError(false);
+                          }}
+                          className="text-[10px] text-on-surface-variant hover:text-error cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
                     <input
                       type="url"
                       name="avatar_url"
@@ -231,6 +286,9 @@ export default function SettingsView({ currentUser, onUpdateUser, onBack, onLogo
                       onChange={handleChange}
                       className="w-full bg-surface border border-outline-variant rounded-lg px-3.5 py-2 text-xs text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
                     />
+                    <span className="text-[10px] text-outline mt-1 block">
+                      Must be a direct image URL (ends in .jpg, .png, .webp, or from Unsplash / DiceBear).
+                    </span>
                   </div>
                 </div>
 
